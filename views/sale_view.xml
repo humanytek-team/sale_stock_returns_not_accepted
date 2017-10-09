@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_order_form_returns_not_accepted" model="ir.ui.view">
+            <field name="name">sale.form.returns.not.accepted</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+              <header position="inside">
+                <button
+                  name="action_add_returns_not_accepted"
+                  type="object"
+                  string="Add returns not accepted"
+                  states="sale" />
+              </header>
+            </field>
+        </record>
+
+    </data>
+</openerp>
