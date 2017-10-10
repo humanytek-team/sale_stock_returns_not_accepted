@@ -31,8 +31,10 @@ class SaleOrder(models.Model):
                 customer_products_returned_not_accepted = dict()
 
                 for quant in customer_quants:
-                    quant_last_move = quant.history_ids.sorted(
-                        key=lambda sm: sm.date)[-1]
+                    quant_last_move = quant.history_ids.filtered(
+                        lambda sm: sm.location_dest_id.id in
+                        returns_not_accepted_locations.mapped('id')).sorted(
+                            key=lambda sm: sm.date)[-1]
 
                     if quant_last_move.partner_id == self.partner_id:
                         if str(quant_last_move.product_id.id) not in \
