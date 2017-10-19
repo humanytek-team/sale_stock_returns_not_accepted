@@ -82,6 +82,9 @@ class SaleOrder(models.Model):
                 Product = self.env['product.product']
                 SaleOrderLine = self.env['sale.order.line']
 
+                if not customer_products_returned_not_accepted:
+                    raise UserError(_('No returns found for this customer'))
+
                 for product_id in customer_products_returned_not_accepted:
                     product_in_another_order = SaleOrderLine.search([
                         ('order_id', '!=', self.id),
@@ -300,6 +303,9 @@ class SaleOrder(models.Model):
                                                                 product_id][i]['qty'],
                                                             })
 
+                            else:
+                                raise UserError(_('The products has been added to this sale order'))
+
                     else:
 
                         product_another_order_total_qty = \
@@ -328,7 +334,7 @@ class SaleOrder(models.Model):
                                 so_line['price_unit'] = 0
                                 so_line['return_not_accepted'] = True
                                 self.update({'order_line': [(0, 0, so_line)]})
-                                
+
                                 for picking in self.picking_ids:
                                     for move in picking.move_lines_related:
                                         sale_order_line = \
@@ -509,6 +515,18 @@ class SaleOrder(models.Model):
                                                                 'product_qty': customer_products_returned_not_accepted[
                                                                     product_id][i]['qty'],
                                                                 })
+
+                                else:
+                                    raise UserError(_('The products has been added to this sale order'))
+
+                        else:
+                            raise UserError(_('The products has been added in other sale order(s)'))
+
+            else:
+                raise UserError(_('No returns found for this customer'))
+
+        else:
+            raise UserError(_('No has been found a location of returns not accepted for your company.'))
 
 
 class SaleOrderLine(models.Model):
