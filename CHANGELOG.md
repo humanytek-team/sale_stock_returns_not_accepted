@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 
+## [9.0.1.1.1] - 2017-10-19
+### changed
+- Fix query of products returned to customer in other sale orders, now the query take in account the customer.
+
 ## [9.0.1.1.0] - 2017-10-19
 ### added
 - Adds warning messages to show the user the reason why the button does not add returned products to the customer's order lines.
