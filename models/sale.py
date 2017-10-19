@@ -92,7 +92,7 @@ class SaleOrder(models.Model):
                         ('product_id', '=', int(product_id)),
                         ('return_not_accepted', '=', True),
                         ('product_uom_qty', '>', 0),
-                        ('partner_id', '=', self.partner_id.id),
+                        ('order_id.partner_id', '=', self.partner_id.id),
                     ])
 
                     total_product_qty = sum([
