@@ -85,7 +85,13 @@ class SaleOrder(models.Model):
                 if not customer_products_returned_not_accepted:
                     raise UserError(_('No returns found for this customer'))
 
+                products_added_self_order = False
+                products_added_other_order = False
+                products_returned_added_order = False
+                orders_with_products_returned = list()
+
                 for product_id in customer_products_returned_not_accepted:
+
                     product_in_another_order = SaleOrderLine.search([
                         ('order_id', '!=', self.id),
                         ('order_id.state', '=', 'sale'),
@@ -94,6 +100,18 @@ class SaleOrder(models.Model):
                         ('product_uom_qty', '>', 0),
                         ('order_id.partner_id', '=', self.partner_id.id),
                     ])
+
+                    for so_line in product_in_another_order:
+                        so = so_line.order_id
+                        so_pickings = so.picking_ids
+                        for picking in so_pickings:
+                            if picking.picking_type_id.code == 'outgoing' and \
+                                    picking.state == 'done':
+                                picking_moves = picking.move_lines_related
+                                picking_moves_products_ids = \
+                                    picking_moves.mapped('product_id.id')
+                                if int(product_id) in picking_moves_products_ids:
+                                    product_in_another_order -= so_line
 
                     total_product_qty = sum([
                         location_products['qty']
@@ -120,6 +138,9 @@ class SaleOrder(models.Model):
                             so_line['price_unit'] = 0
                             so_line['return_not_accepted'] = True
                             self.update({'order_line': [(0, 0, so_line)]})
+
+                            if not products_returned_added_order:
+                                products_returned_added_order = True
 
                             for picking in self.picking_ids:
                                 for move in picking.move_lines_related:
@@ -222,6 +243,9 @@ class SaleOrder(models.Model):
                                 product_order_line[0].product_uom_qty += \
                                     product_remaining_qty
 
+                                if not products_returned_added_order:
+                                    products_returned_added_order = True
+
                                 for picking in self.picking_ids:
                                     for move in picking.move_lines_related:
                                         sale_order_line = \
@@ -305,7 +329,8 @@ class SaleOrder(models.Model):
                                                             })
 
                             else:
-                                raise UserError(_('The products has been added to this sale order'))
+                                if not products_added_self_order:
+                                    products_added_self_order = True
 
                     else:
 
@@ -335,6 +360,9 @@ class SaleOrder(models.Model):
                                 so_line['price_unit'] = 0
                                 so_line['return_not_accepted'] = True
                                 self.update({'order_line': [(0, 0, so_line)]})
+
+                                if not products_returned_added_order:
+                                    products_returned_added_order = True
 
                                 for picking in self.picking_ids:
                                     for move in picking.move_lines_related:
@@ -435,6 +463,9 @@ class SaleOrder(models.Model):
                                     product_order_line[0].product_uom_qty += \
                                         product_remaining_qty
 
+                                    if not products_returned_added_order:
+                                        products_returned_added_order = True
+
                                     for picking in self.picking_ids:
                                         for move in picking.move_lines_related:
                                             sale_order_line = \
@@ -518,10 +549,35 @@ class SaleOrder(models.Model):
                                                                 })
 
                                 else:
-                                    raise UserError(_('The products has been added to this sale order'))
+                                    if not products_added_self_order:
+                                        products_added_self_order = True
 
                         else:
-                            raise UserError(_('The products has been added in other sale order(s)'))
+
+                            for order in \
+                                    product_in_another_order.mapped('order_id'):
+                                if order.name not in orders_with_products_returned:
+                                    orders_with_products_returned.append(
+                                        order.name)
+
+                            if not products_added_other_order:
+                                products_added_other_order = True
+
+                if not products_returned_added_order:
+
+                    message = str()
+                    if products_added_self_order:
+                        message += \
+                            _('The products has been added to this sale order \n')
+
+                    if products_added_other_order:
+                        message += \
+                            _('The products has been added in other sale order(s) \n')
+                        message += _('look at: %s' % ', '.join(orders_with_products_returned))
+
+                    if message != str():
+                        raise UserError(message)
+
 
             else:
                 raise UserError(_('No returns found for this customer'))
