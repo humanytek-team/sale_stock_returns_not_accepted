@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 
+## [9.0.1.1.3] - 2017-10-20
+### changed
+- Fix bug in detection in other sale orders of products returned by customer.
+
 ## [9.0.1.1.2] - 2017-10-19
 ### changed
 - Fix query of products returned to customer in other sale orders, now the query take in account the customer.

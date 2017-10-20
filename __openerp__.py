@@ -4,7 +4,7 @@
 
 {
     'name': 'Manager of returns not accepted in sale orders',
-    'version': '9.0.1.1.2',
+    'version': '9.0.1.1.3',
     'category': 'Sales',
     'summary': 'Manager of returns not accepted',
     'author': 'Humanytek',
