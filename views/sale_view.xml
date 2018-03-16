@@ -7,7 +7,7 @@
       <field name="inherit_id" ref="sale.view_order_form"/>
       <field name="arch" type="xml">
         <header position="inside">
-          <button name="action_add_returns_not_accepted" type="object" string="Add returns not accepted" states="sale"/>
+          <button name="action_add_returns_not_accepted" type="object" string="Add returns not accepted" states="draft,sent,sale"/>
         </header>
       </field>
     </record>
